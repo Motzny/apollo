@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final String logTag = "MainActivity";
     private Queue<Player> activePlayers;
     private Player currentPlayer;
+    Character previousLastLetter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 activePlayers = new LinkedList<Player>();
                 activePlayers.addAll(players);
                 currentPlayer = activePlayers.poll();
+                previousLastLetter = null;
                 listenToPlayer();
                 break;
 
@@ -102,9 +104,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_OK && resultCode == RESULT_OK) {
             String currentResult = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0); //only get the most likely result
-                if (currentPlayer.getThingsYouSaid().contains(currentResult)) {
-                    currentPlayer.loose();
+            char currentFirstLetter = currentResult.charAt(0);
+            if (previousLastLetter != null) {                                                       //first player in a game can never loose
+                if (currentPlayer.getThingsYouSaid().contains(currentResult) || currentFirstLetter != previousLastLetter) {
+                    currentPlayer.loose(); // TODO reduce indent
                 }
+            }
             currentPlayer.addThingYouSaid(currentResult);
             if (!currentPlayer.isLost()) {
                 activePlayers.add(currentPlayer);
@@ -120,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ListView lvPlayers = (ListView)findViewById(R.id.lvPlayers);
             ArrayAdapter<Player> aaPlayers = new ArrayAdapter<Player>(this, android.R.layout.simple_list_item_1, players);
             lvPlayers.setAdapter(aaPlayers);
+            previousLastLetter = currentResult.charAt(currentResult.length() - 1);
             listenToPlayer();
         }
     }
