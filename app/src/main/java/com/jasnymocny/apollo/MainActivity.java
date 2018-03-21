@@ -102,11 +102,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_OK && resultCode == RESULT_OK) {
             String currentResult = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0); //only get the most likely result
-            for (String curr : currentPlayer.getThingsYouSaid()) {
                 if (currentPlayer.getThingsYouSaid().contains(currentResult)) {
                     currentPlayer.loose();
                 }
-            }
             currentPlayer.addThingYouSaid(currentResult);
             if (!currentPlayer.isLost()) {
                 activePlayers.add(currentPlayer);
