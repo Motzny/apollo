@@ -1,7 +1,7 @@
 package com.jasnymocny.apollo;
 
-import android.app.Activity;
 import android.content.Intent;
+import android.os.CountDownTimer;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,7 +18,7 @@ import java.util.Queue;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    protected static final int REQUEST_OK = 1;
+    protected static final int RECOGNIZE_SPEECH = 1;
     private ArrayList<Player> players;
     private final String logTag = "MainActivity";
     private Queue<Player> activePlayers;
@@ -87,7 +87,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, "en-US");
         try {
-            startActivityForResult(i, REQUEST_OK);
+            startActivityForResult(i, RECOGNIZE_SPEECH);
+            new CountDownTimer(3000, 1000) {
+                TextView tv = (TextView)findViewById(R.id.text1);
+
+                public void onTick(long millisUntilFinished) {
+                    tv.setText("seconds remaining: " + millisUntilFinished / 1000);
+                }
+
+                public void onFinish() {
+                    Toast.makeText(MainActivity.this, "Too slow", Toast.LENGTH_LONG).show();
+                    finishActivity(RECOGNIZE_SPEECH);
+                }
+            }.start();
+
         } catch (Exception e) {
             Toast.makeText(this, "Error initializing speech to text engine.", Toast.LENGTH_LONG).show();
         }
@@ -102,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_OK && resultCode == RESULT_OK) {
+        if (requestCode == RECOGNIZE_SPEECH && resultCode == RESULT_OK) {
             String currentResult = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0); //only get the most likely result
             char currentFirstLetter = currentResult.charAt(0);
             if (previousLastLetter != null) {                                                       //first player in a game can never loose
