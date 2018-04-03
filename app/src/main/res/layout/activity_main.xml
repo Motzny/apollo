@@ -12,17 +12,32 @@
     <TextView
         android:id="@+id/tvCurrentPlayer"
         android:layout_width="match_parent"
-        android:layout_height="49dp"
+        android:layout_height="wrap_content"
+        android:text="tvCurrentPlayer"
         android:textAlignment="center"
         android:textAllCaps="false"
         android:textSize="36sp"
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/text1"
+        android:id="@+id/tvTimer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="tvTimer"
+        android:textAlignment="center"
         android:textSize="30sp" />
+
+    <TextView
+        android:id="@+id/lastResult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="lastResult" />
+
+    <TextView
+        android:id="@+id/tvRdms"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="tvRdms" />
 
     <Button
         android:id="@+id/button1"
