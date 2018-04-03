@@ -1,10 +1,10 @@
 package com.jasnymocny.apollo;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -23,7 +23,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final String logTag = "MainActivity";
     private Queue<Player> activePlayers;
     private Player currentPlayer;
-    Character previousLastLetter;
+    private Character previousLastLetter;
+    private CountDownTimer timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Intent intent = getIntent();
 
-        players = new ArrayList<Player>();
+        players = new ArrayList<>();
 
 
         if (savedInstanceState == null) {
@@ -43,20 +44,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else  {
             players = savedInstanceState.getParcelableArrayList("players");
         }
+
         String newPlayerName = intent.getStringExtra("playerName");
+        int newPlayerColor = intent.getIntExtra("color",0);
         if (savedInstanceState == null && newPlayerName != null) {
-            players.add(new Player(newPlayerName));
+            players.add(new Player(newPlayerName, newPlayerColor));
         }
 
         if (players == null){
             Log.v(logTag, "Assuming this is a cold run, setting players to empty ArrList");
-            players = new ArrayList<Player>();
+            players = new ArrayList<>();
         }
 
-        ListView lvPlayers = (ListView)findViewById(R.id.lvPlayers);
-        ArrayAdapter<Player> aaPlayers = new ArrayAdapter<Player>(this, android.R.layout.simple_list_item_1, players);
-        lvPlayers.setAdapter(aaPlayers);
+        updateDisplayPlayerList();
 
+        
     }
 
     @Override
@@ -70,10 +72,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
 
             case R.id.button1: //start game
-                activePlayers = new LinkedList<Player>();
+
+                activePlayers = new LinkedList<>();
                 activePlayers.addAll(players);
                 currentPlayer = activePlayers.poll();
                 previousLastLetter = null;
+
                 listenToPlayer();
                 break;
 
@@ -84,22 +88,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void listenToPlayer() {
+        Log.v("MainActivity","listenToPlayer(): Name of current player: " + currentPlayer.getName());
+        final TextView tvPlayer = findViewById(R.id.tvCurrentPlayer);
+        tvPlayer.setText(currentPlayer.getName());
+        tvPlayer.invalidate();
+
         Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, "en-US");
+        startActivityForResult(i, RECOGNIZE_SPEECH);
         try {
-            startActivityForResult(i, RECOGNIZE_SPEECH);
-            new CountDownTimer(3000, 1000) {
-                TextView tv = (TextView)findViewById(R.id.text1);
-
+           timer = new CountDownTimer(9000, 1000){
                 public void onTick(long millisUntilFinished) {
-                    tv.setText("seconds remaining: " + millisUntilFinished / 1000);
+                    tvPlayer.setText(currentPlayer.getName() + " " + millisUntilFinished/1000);
                 }
-
                 public void onFinish() {
-                    Toast.makeText(MainActivity.this, "Too slow", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this,  currentPlayer.getName() + " lost: time out", Toast.LENGTH_SHORT).show();
                     finishActivity(RECOGNIZE_SPEECH);
-                }
+                    currentPlayer.loose();
+                    try {
+                        currentPlayer = activePlayers.remove();
+                        listenToPlayer();
+                    } catch (Exception e) {	//last player standing wins
+                        Toast.makeText(MainActivity.this,  currentPlayer.getName() + " wins!", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+               }
             }.start();
+
+
 
         } catch (Exception e) {
             Toast.makeText(this, "Error initializing speech to text engine.", Toast.LENGTH_LONG).show();
@@ -115,11 +131,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        timer.cancel();
         if (requestCode == RECOGNIZE_SPEECH && resultCode == RESULT_OK) {
-            String currentResult = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0); //only get the most likely result
+            String currentResult = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0).toLowerCase(); //only get the most likely result
             char currentFirstLetter = currentResult.charAt(0);
             if (previousLastLetter != null) {                                                       //first player in a game can never loose
                 if (currentPlayer.getThingsYouSaid().contains(currentResult) || currentFirstLetter != previousLastLetter) {
+                    Toast.makeText(MainActivity.this,  currentPlayer.getName() + "lost: wrong word", Toast.LENGTH_SHORT).show();
                     currentPlayer.loose(); // TODO reduce indent
                 }
             }
@@ -130,16 +148,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             try {
                 currentPlayer = activePlayers.remove();
+                TextView tvPlayer = findViewById(R.id.tvCurrentPlayer);
+                tvPlayer.setText(currentPlayer.getName());
+                tvPlayer.setBackgroundColor(currentPlayer.getColor());
+                tvPlayer.invalidate();
             } catch (Exception e) {	//last player standing wins
+                Toast.makeText(MainActivity.this,  currentPlayer.getName() + " wins!", Toast.LENGTH_SHORT).show();
                 return;
             }
-            TextView tv = (TextView)findViewById(R.id.text1);
-            tv.setText(currentPlayer.toString());
-            ListView lvPlayers = (ListView)findViewById(R.id.lvPlayers);
-            ArrayAdapter<Player> aaPlayers = new ArrayAdapter<Player>(this, android.R.layout.simple_list_item_1, players);
-            lvPlayers.setAdapter(aaPlayers);
+
+            updateDisplayPlayerList();
             previousLastLetter = currentResult.charAt(currentResult.length() - 1);
             listenToPlayer();
         }
     }
+
+    private void updateDisplayPlayerList() {
+        ListView lvPlayers = findViewById(R.id.lvPlayers);
+        ArrayAdapter<Player> aaPlayers = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, players);
+        lvPlayers.setAdapter(aaPlayers);
+    }
+
 }

@@ -11,6 +11,7 @@ class Player implements Parcelable {
 
     private boolean lost = false;
     private String name;
+    private int color;
     private byte score = 0;
 
     public byte getScore() {
@@ -33,6 +34,10 @@ class Player implements Parcelable {
         this.thingsYouSaid.add(thingYouSaid);
     }
 
+    int getColor() {
+        return color;
+    }
+
     public boolean isLost() {
         return lost;
     }
@@ -41,8 +46,9 @@ class Player implements Parcelable {
         lost = true;
     }
 
-    public Player (String name){
+    public Player(String name, int color){
         this.name = name;
+        this.color = color;
     }
 
     @Override

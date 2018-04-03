@@ -1,29 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="24dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="38dp"
+        android:layout_marginLeft="4dp"
+        android:text="New player:"
+        android:textSize="18sp" />
 
     <EditText
         android:id="@+id/editText"
-        android:layout_width="258dp"
+        android:layout_width="182dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="124dp"
         android:ems="15"
         android:hint="name"
-        android:inputType="textPersonName"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:layout_editor_absoluteY="0dp" />
+        android:inputType="textWebEditText" />
 
-    <Button
-        android:id="@+id/bOkPlayerName"
-        android:layout_width="125dp"
-        android:layout_height="wrap_content"
-        android:text="OK"
-        tools:layout_editor_absoluteX="260dp"
-        tools:layout_editor_absoluteY="0dp" />
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="15dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <SeekBar
+            android:id="@+id/seekbar_font"
+            style="@android:style/Widget.Material.SeekBar"
+            android:layout_width="105dp"
+            android:layout_height="match_parent"
+            android:layout_margin="6dp"
+            android:layout_weight="1"
+            android:max="100"
+            android:progress="50" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="186dp"
+        android:layout_height="40dp"
+        android:layout_margin="2dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/bBack"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="80dp"
+            android:layout_height="38dp"
+            android:text="Back" />
+
+        <Space
+            android:layout_width="8dp"
+            android:layout_height="35dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/bOkPlayerName"
+            style="@android:style/Widget.Material.Button.Borderless.Colored"
+            android:layout_width="64dp"
+            android:layout_height="38dp"
+            android:text="OK"
+            android:textColor="@color/colorPrimaryDark" />
+    </LinearLayout>
+
 
 </LinearLayout>
+
